@@ -1,0 +1,2137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide Complet - Gemini CLI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-tertiary: #1a1a24;
+            --bg-card: #14141e;
+            --bg-code: #0d0d14;
+            --fg: #e8e8f0;
+            --fg-secondary: #a0a0b8;
+            --fg-muted: #6a6a82;
+            --accent: #4285f4;
+            --accent-light: #66a3ff;
+            --accent-dark: #2a5db0;
+            --accent-glow: rgba(66, 133, 244, 0.15);
+            --green: #34a853;
+            --green-glow: rgba(52, 168, 83, 0.15);
+            --yellow: #fbbc04;
+            --yellow-glow: rgba(251, 188, 4, 0.12);
+            --red: #ea4335;
+            --red-glow: rgba(234, 67, 53, 0.12);
+            --purple: #a855f7;
+            --purple-glow: rgba(168, 85, 247, 0.12);
+            --cyan: #22d3ee;
+            --cyan-glow: rgba(34, 211, 238, 0.12);
+            --orange: #f97316;
+            --orange-glow: rgba(249, 115, 22, 0.12);
+            --pink: #ec4899;
+            --pink-glow: rgba(236, 72, 153, 0.12);
+            --border: #2a2a38;
+            --border-light: #3a3a4a;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-xs: 6px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.3);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: var(--border-light) var(--bg); }
+        html::-webkit-scrollbar { width: 8px; }
+        html::-webkit-scrollbar-track { background: var(--bg); }
+        html::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(66,133,244,0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(168,85,247,0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 50%, rgba(34,168,83,0.04) 0%, transparent 60%);
+            animation: heroGlow 15s ease-in-out infinite alternate;
+        }
+        @keyframes heroGlow {
+            0% { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(5deg) scale(1.1); }
+        }
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(66,133,244,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(66,133,244,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        }
+        .hero-content {
+            position: relative;
+            max-width: 900px;
+            z-index: 1;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-glow);
+            border: 1px solid rgba(66,133,244,0.3);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            color: var(--accent-light);
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,168,83,0.4); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(52,168,83,0); }
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+        }
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 50%, var(--cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--fg-secondary);
+            max-width: 640px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.8;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 20px var(--accent-glow), 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .btn-primary:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(66,133,244,0.3), 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--fg);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+
+        /* ===== NAV ===== */
+        .nav-float {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(20, 20, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 6px 8px;
+            display: flex;
+            gap: 2px;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        .nav-float.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .nav-float a {
+            color: var(--fg-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 8px 14px;
+            border-radius: 50px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .nav-float a:hover, .nav-float a.active {
+            color: var(--fg);
+            background: var(--accent-glow);
+        }
+
+        /* ===== LAYOUT ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        .section {
+            padding: 6rem 0;
+        }
+        .section + .section {
+            border-top: 1px solid var(--border);
+        }
+
+        /* ===== SECTION HEADERS ===== */
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+        .section-desc {
+            color: var(--fg-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.05rem;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            transition: var(--transition);
+        }
+        .card:hover {
+            border-color: var(--border-light);
+            box-shadow: var(--shadow);
+        }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+        }
+        .card-icon.blue { background: var(--accent-glow); color: var(--accent); }
+        .card-icon.green { background: var(--green-glow); color: var(--green); }
+        .card-icon.yellow { background: var(--yellow-glow); color: var(--yellow); }
+        .card-icon.purple { background: var(--purple-glow); color: var(--purple); }
+        .card-icon.cyan { background: var(--cyan-glow); color: var(--cyan); }
+        .card-icon.red { background: var(--red-glow); color: var(--red); }
+        .card-icon.orange { background: var(--orange-glow); color: var(--orange); }
+        .card-icon.pink { background: var(--pink-glow); color: var(--pink); }
+
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .card p {
+            color: var(--fg-secondary);
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
+
+        /* ===== CODE BLOCKS ===== */
+        .code-block {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
+        }
+        .code-header .lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+        .code-header .copy-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--fg-muted);
+            padding: 4px 10px;
+            border-radius: var(--radius-xs);
+            font-family: inherit;
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .code-header .copy-btn:hover {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border-color: rgba(66,133,244,0.3);
+        }
+        .code-block pre {
+            padding: 16px 20px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: var(--fg);
+        }
+        .code-block pre .comment { color: var(--fg-muted); }
+        .code-block pre .cmd { color: var(--accent-light); }
+        .code-block pre .flag { color: var(--yellow); }
+        .code-block pre .string { color: var(--green); }
+        .code-block pre .output { color: var(--fg-secondary); }
+
+        /* ===== INLINE CODE ===== */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(66,133,244,0.08);
+            border: 1px solid rgba(66,133,244,0.15);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            color: var(--accent-light);
+        }
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* ===== COMMAND TABLE ===== */
+        .cmd-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        .cmd-table thead th {
+            text-align: left;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--fg-muted);
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border);
+        }
+        .cmd-table tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            vertical-align: top;
+        }
+        .cmd-table tbody tr:hover {
+            background: rgba(66,133,244,0.03);
+        }
+        .cmd-table .cmd-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--accent-light);
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+        .cmd-table .cmd-desc {
+            color: var(--fg-secondary);
+            font-size: 0.9rem;
+        }
+        .cmd-table .cmd-example {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--green);
+            background: var(--bg-code);
+            padding: 4px 10px;
+            border-radius: var(--radius-xs);
+            border: 1px solid var(--border);
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        /* ===== TIPS BOX ===== */
+        .tip-box {
+            border-radius: var(--radius);
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            border-left: 4px solid;
+        }
+        .tip-box.pro { background: var(--accent-glow); border-color: var(--accent); }
+        .tip-box.warn { background: var(--yellow-glow); border-color: var(--yellow); }
+        .tip-box.danger { background: var(--red-glow); border-color: var(--red); }
+        .tip-box.idea { background: var(--purple-glow); border-color: var(--purple); }
+        .tip-box.success { background: var(--green-glow); border-color: var(--green); }
+
+        .tip-box .tip-label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tip-box.pro .tip-label { color: var(--accent); }
+        .tip-box.warn .tip-label { color: var(--yellow); }
+        .tip-box.danger .tip-label { color: var(--red); }
+        .tip-box.idea .tip-label { color: var(--purple); }
+        .tip-box.success .tip-label { color: var(--green); }
+
+        .tip-box p {
+            color: var(--fg-secondary);
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+        .tip-box code {
+            font-size: 0.85em;
+        }
+
+        /* ===== STEP LIST ===== */
+        .steps {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0;
+        }
+        .steps li {
+            position: relative;
+            padding: 1rem 0 1rem 3.5rem;
+            border-left: 2px solid var(--border);
+            margin-left: 1rem;
+        }
+        .steps li::before {
+            content: attr(data-step);
+            position: absolute;
+            left: -15px;
+            top: 1rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .steps li:last-child {
+            border-left-color: transparent;
+        }
+        .steps li strong {
+            color: var(--fg);
+        }
+
+        /* ===== ACCORDION ===== */
+        .accordion {
+            margin: 1.5rem 0;
+        }
+        .accordion-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+        .accordion-header {
+            width: 100%;
+            background: var(--bg-card);
+            border: none;
+            color: var(--fg);
+            padding: 1rem 1.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+        .accordion-header:hover {
+            background: var(--bg-tertiary);
+        }
+        .accordion-header .chevron {
+            transition: var(--transition);
+            color: var(--fg-muted);
+            font-size: 0.8rem;
+        }
+        .accordion-item.open .accordion-header .chevron {
+            transform: rotate(180deg);
+        }
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: var(--bg-secondary);
+        }
+        .accordion-item.open .accordion-body {
+            max-height: 2000px;
+        }
+        .accordion-body-inner {
+            padding: 1.5rem;
+        }
+
+        /* ===== FEATURE SHOWCASE ===== */
+        .feature-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+            margin: 3rem 0;
+        }
+        .feature-row.reverse {
+            direction: rtl;
+        }
+        .feature-row.reverse > * {
+            direction: ltr;
+        }
+        .feature-text h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .feature-text p {
+            color: var(--fg-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        /* ===== SCROLL TO TOP ===== */
+        .scroll-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 16px rgba(66,133,244,0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
+            z-index: 100;
+        }
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .scroll-top:hover {
+            background: var(--accent-light);
+            transform: translateY(-3px);
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--fg-muted);
+            font-size: 0.85rem;
+        }
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        footer a:hover { text-decoration: underline; }
+
+        /* ===== ANIMATIONS ===== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .section { padding: 3rem 0; }
+            .container { padding: 0 1rem; }
+            .feature-row { grid-template-columns: 1fr; }
+            .feature-row.reverse { direction: ltr; }
+            .nav-float { display: none; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .cmd-table { font-size: 0.85rem; }
+            .cmd-table .cmd-example { font-size: 0.75rem; }
+        }
+
+        /* ===== MISC ===== */
+        ::selection {
+            background: var(--accent);
+            color: white;
+        }
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
+        }
+        .tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .tag-new { background: var(--green-glow); color: var(--green); border: 1px solid rgba(52,168,83,0.3); }
+        .tag-advanced { background: var(--purple-glow); color: var(--purple); border: 1px solid rgba(168,85,247,0.3); }
+        .tag-essential { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(66,133,244,0.3); }
+        .tag-experimental { background: var(--yellow-glow); color: var(--yellow); border: 1px solid rgba(251,188,4,0.3); }
+        .tag-multimodal { background: var(--pink-glow); color: var(--pink); border: 1px solid rgba(236,72,153,0.3); }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 3rem 0;
+        }
+
+        .kbd {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 7px;
+            color: var(--fg-secondary);
+            box-shadow: 0 1px 0 var(--border);
+        }
+
+        /* Flowchart / visual steps */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+        .flow-step {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .flow-arrow {
+            color: var(--fg-muted);
+            font-size: 1.2rem;
+        }
+
+        /* Comparison */
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .compare-col h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid;
+        }
+        .compare-col.bad h4 { border-color: var(--red); color: var(--red); }
+        .compare-col.good h4 { border-color: var(--green); color: var(--green); }
+        .compare-col ul {
+            list-style: none;
+            padding: 0;
+        }
+        .compare-col ul li {
+            padding: 6px 0;
+            font-size: 0.88rem;
+            color: var(--fg-secondary);
+        }
+        .compare-col ul li::before {
+            margin-right: 8px;
+        }
+        .compare-col.bad ul li::before { content: "✕"; color: var(--red); }
+        .compare-col.good ul li::before { content: "✓"; color: var(--green); }
+
+        @media (max-width: 768px) {
+            .compare-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== NAVIGATION FLOTTANTE ===== -->
+<nav class="nav-float" id="navFloat">
+    <a href="#install">Install</a>
+    <a href="#commands">Commandes</a>
+    <a href="#config">Config</a>
+    <a href="#tools">Outils</a>
+    <a href="#advanced">Avancé</a>
+    <a href="#tips">Conseils</a>
+    <a href="#ideas">Idées</a>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="top">
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="dot"></span>
+            Open Source &middot; Google &middot; 2026 Ready
+        </div>
+        <h1>
+            Guide Ultra-Complet<br>
+            <span class="gradient">Gemini CLI</span>
+        </h1>
+        <p>
+            Tout ce que vous devez savoir pour maîtriser Gemini CLI, l'agent IA open-source de Google qui transforme votre terminal en assistant intelligent. Installation, configuration avancée, gestion multimodale et exécution de code.
+        </p>
+        <div class="hero-actions">
+            <a href="#install" class="btn btn-primary">
+                &#9650; Commencer l'installation
+            </a>
+            <a href="#commands" class="btn btn-secondary">
+                Voir les commandes
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== INSTALLATION ===== -->
+<section class="section" id="install">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label">&#9650; Démarrage</div>
+            <h2 class="section-title">Installation & Authentification</h2>
+            <p class="section-desc">De zéro à opérationnel en moins de 2 minutes. Suivez ces étapes pour installer et configurer Gemini CLI.</p>
+        </div>
+
+        <div class="grid-2 fade-in">
+            <!-- Install Globally -->
+            <div class="card">
+                <div class="card-icon blue">&#9650;</div>
+                <h3>Installation globale</h3>
+                <p>Installez Gemini CLI globalement via npm. C'est la méthode recommandée pour une utilisation régulière.</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="cmd">npm</span> install -g <span class="string">@google/gemini-cli</span>
+
+<span class="comment"># Vérifier l'installation</span>
+<span class="cmd">gemini</span> --version</code></pre>
+                </div>
+                <p style="margin-top:0.8rem;font-size:0.88rem;">Prérequis : Node.js 18+ et npm. Sur macOS, vous pouvez aussi utiliser <code>brew install node</code>.</p>
+            </div>
+
+            <!-- Run without install -->
+            <div class="card">
+                <div class="card-icon green">&#9650;</div>
+                <h3>Essayer sans installer</h3>
+                <p>Utilisez npx pour exécuter Gemini CLI sans installation permanente. Parfait pour tester rapidement.</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="cmd">npx</span> <span class="string">@google/gemini-cli</span>
+
+<span class="comment"># Ou avec un prompt directement</span>
+<span class="cmd">npx</span> <span class="string">@google/gemini-cli</span> <span class="flag">-p</span> <span class="string">"Hello Gemini!"</span></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Authentication -->
+        <div class="card fade-in" style="margin-top:2rem;">
+            <div class="card-icon yellow" style="margin-bottom:1rem;">&#128273;</div>
+            <h3>Authentification Sécurisée</h3>
+            <p style="margin-bottom:1.5rem;">Ne laissez jamais traîner vos clés API en clair. Voici les meilleures méthodes pour s'authentifier via Google AI Studio.</p>
+
+            <div class="grid-2">
+                <div>
+                    <h4 style="font-size:1rem;margin-bottom:0.8rem;">Méthode 1 : Variables Sécurisées (Pro)</h4>
+                    <ol class="steps">
+                        <li data-step="1"><strong>Créez votre clé</strong> sur <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
+                        <li data-step="2"><strong>Utilisez un gestionnaire</strong> comme 1Password CLI ou <code>direnv</code> pour l'injecter dynamiquement :
+                            <div class="code-block" style="margin:0.5rem 0;">
+                                <div class="code-header">
+                                    <span class="lang">bash</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                                </div>
+                                <pre><code><span class="comment"># Exemple avec 1Password CLI dans ~/.zshrc</span>
+<span class="cmd">export</span> GEMINI_API_KEY=$(op read <span class="string">"op://Private/Gemini/credential"</span>)
+
+<span class="comment"># Ou classique : export direct</span>
+<span class="cmd">export</span> GEMINI_API_KEY=<span class="string">"votre_cle_api_ici"</span></code></pre>
+                            </div>
+                        </li>
+                        <li data-step="3"><strong>Rechargez votre shell</strong> : <code>source ~/.zshrc</code></li>
+                    </ol>
+                </div>
+                <div>
+                    <h4 style="font-size:1rem;margin-bottom:0.8rem;">Méthode 2 : Fichier .env local</h4>
+                    <p style="color:var(--fg-secondary);font-size:0.9rem;margin-bottom:1rem;">Créez un fichier <code>.env</code> dans <code>~/.gemini/</code> (global) ou <code>./.gemini/</code> (projet) :</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="lang">env</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                        </div>
+                        <pre><code><span class="comment"># ~/.gemini/.env</span>
+GEMINI_API_KEY=<span class="string">"votre_cle_api_ici"</span></code></pre>
+                    </div>
+                    <div class="tip-box success" style="margin-top:1rem;">
+                        <div class="tip-label">&#10003; Astuce Pro</div>
+                        <p>Ajoutez toujours <code>.gemini/</code> à votre <code>.gitignore</code> racine pour éviter de commiter vos configurations de projet et clés. Utilisez la méthode <code>.env</code> par projet pour gérer différents comptes API.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- First Launch -->
+        <div class="card fade-in" style="margin-top:1.5rem;">
+            <div class="card-icon purple" style="margin-bottom:1rem;">&#127919;</div>
+            <h3>Premier lancement</h3>
+            <p style="margin-bottom:1rem;">Lancez Gemini CLI et commencez à interagir immédiatement :</p>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="lang">bash</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                </div>
+                <pre><code><span class="comment"># Mode interactif (REPL) - Conversation continue</span>
+<span class="cmd">gemini</span>
+
+<span class="comment"># Mode non-interactif - Une seule réponse</span>
+<span class="cmd">gemini</span> <span class="flag">-p</span> <span class="string">"Explique-moi le pattern MVC en 3 phrases"</span>
+
+<span class="comment"># Mode interactif avec prompt initial</span>
+<span class="cmd">gemini</span> <span class="flag">-i</span> <span class="string">"Aide-moi à refactorer ce projet"</span>
+
+<span class="comment"># Piping - Envoyer du contenu via pipe</span>
+<span class="cmd">cat</span> README.md <span class="cmd">|</span> <span class="cmd">gemini</span> <span class="flag">-p</span> <span class="string">"Résume ce fichier"</span>
+
+<span class="comment"># Mode sandbox sécurisé (Docker/Podman requis)</span>
+<span class="cmd">gemini</span> <span class="flag">--sandbox</span> <span class="flag">-p</span> <span class="string">"Analyse ces logs d'erreur"</span></code></pre>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CORE COMMANDS ===== -->
+<section class="section" id="commands">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label">&#9650; Commandes</div>
+            <h2 class="section-title">Commandes, Flags & Contextes Multimodaux</h2>
+            <p class="section-desc">Toutes les commandes essentielles pour piloter Gemini CLI, avec un exemple concret pour chacune.</p>
+        </div>
+
+        <!-- Slash Commands -->
+        <h2 class="fade-in" style="margin-bottom:0.5rem;">&#47; Slash Commands <span class="tag tag-essential">Essentiel</span></h2>
+        <p class="fade-in" style="color:var(--fg-secondary);margin-bottom:1.5rem;">Les slash commands contrôlent le CLI lui-même. Tapez <code>/help</code> dans le REPL pour la liste complète.</p>
+
+        <div class="card fade-in" style="padding:0;overflow-x:auto;">
+            <table class="cmd-table">
+                <thead>
+                    <tr>
+                        <th style="width:180px;">Commande</th>
+                        <th>Description</th>
+                        <th style="width:300px;">Exemple concret</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="cmd-name">/compress</td>
+                        <td class="cmd-desc">Résume tout le contexte de chat pour économiser des tokens</td>
+                        <td><span class="cmd-example">/compress</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/clear</td>
+                        <td class="cmd-desc">Efface l'écran et le contexte (<kbd class="kbd">Ctrl+L</kbd>)</td>
+                        <td><span class="cmd-example">/clear</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/copy</td>
+                        <td class="cmd-desc">Copie la dernière réponse dans le presse-papier</td>
+                        <td><span class="cmd-example">/copy</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/tools</td>
+                        <td class="cmd-desc">Liste tous les outils disponibles</td>
+                        <td><span class="cmd-example">/tools</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/mcp</td>
+                        <td class="cmd-desc">Liste les serveurs MCP configurés et leurs outils</td>
+                        <td><span class="cmd-example">/mcp</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/extensions</td>
+                        <td class="cmd-desc">Liste les extensions actives</td>
+                        <td><span class="cmd-example">/extensions</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/stats</td>
+                        <td class="cmd-desc">Affiche la consommation de tokens de la session</td>
+                        <td><span class="cmd-example">/stats</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/memory show</td>
+                        <td class="cmd-desc">Affiche le contexte combiné de tous les GEMINI.md</td>
+                        <td><span class="cmd-example">/memory show</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/memory refresh</td>
+                        <td class="cmd-desc">Recharge tous les fichiers GEMINI.md</td>
+                        <td><span class="cmd-example">/memory refresh</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/chat save &lt;tag&gt;</td>
+                        <td class="cmd-desc">Sauvegarde la conversation avec un tag</td>
+                        <td><span class="cmd-example">/chat save refactor-auth</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/chat resume &lt;tag&gt;</td>
+                        <td class="cmd-desc">Reprend une conversation sauvegardée</td>
+                        <td><span class="cmd-example">/chat resume refactor-auth</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/chat list</td>
+                        <td class="cmd-desc">Liste les conversations sauvegardées</td>
+                        <td><span class="cmd-example">/chat list</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/restore</td>
+                        <td class="cmd-desc">Liste ou restaure un checkpoint du projet</td>
+                        <td><span class="cmd-example">/restore checkpoint_001</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/auth</td>
+                        <td class="cmd-desc">Change la méthode d'authentification</td>
+                        <td><span class="cmd-example">/auth</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/settings</td>
+                        <td class="cmd-desc">Éditeur convivial pour settings.json</td>
+                        <td><span class="cmd-example">/settings</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/init</td>
+                        <td class="cmd-desc">Génère un GEMINI.md initial pour le projet</td>
+                        <td><span class="cmd-example">/init</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/theme</td>
+                        <td class="cmd-desc">Change le thème visuel du CLI</td>
+                        <td><span class="cmd-example">/theme</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/vim</td>
+                        <td class="cmd-desc">Active/désactive le mode Vim pour l'input</td>
+                        <td><span class="cmd-example">/vim</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/ide</td>
+                        <td class="cmd-desc">Gère l'intégration IDE (install, enable)</td>
+                        <td><span class="cmd-example">/ide install</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/directory</td>
+                        <td class="cmd-desc">Gère les répertoires du workspace multi-dossier</td>
+                        <td><span class="cmd-example">/directory add ../shared-lib</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">/quit</td>
+                        <td class="cmd-desc">Quitte Gemini CLI</td>
+                        <td><span class="cmd-example">/quit</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- CLI Flags -->
+        <h2 class="fade-in" style="margin-top:3rem;margin-bottom:0.5rem;">&#9650; Flags en ligne de commande <span class="tag tag-advanced">Avancé</span></h2>
+        <p class="fade-in" style="color:var(--fg-secondary);margin-bottom:1.5rem;">Options disponibles au lancement de Gemini CLI.</p>
+
+        <div class="card fade-in" style="padding:0;overflow-x:auto;">
+            <table class="cmd-table">
+                <thead>
+                    <tr>
+                        <th style="width:200px;">Flag</th>
+                        <th>Description</th>
+                        <th style="width:300px;">Exemple concret</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="cmd-name">-p &lt;prompt&gt;</td>
+                        <td class="cmd-desc">Exécute en mode non-interactif avec un prompt</td>
+                        <td><span class="cmd-example">gemini -p "Liste les bugs du code"</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">-i &lt;prompt&gt;</td>
+                        <td class="cmd-desc">Démarre interactif avec un prompt initial</td>
+                        <td><span class="cmd-example">gemini -i "Aide-moi à debug ce crash"</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">-m &lt;modèle&gt;</td>
+                        <td class="cmd-desc">Utilise un modèle spécifique</td>
+                        <td><span class="cmd-example">gemini -m gemini-2.5-pro</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">-r &lt;modèle&gt;</td>
+                        <td class="cmd-desc">Spécifie le modèle pour les réponses</td>
+                        <td><span class="cmd-example">gemini -r gemini-2.5-flash</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">--sandbox</td>
+                        <td class="cmd-desc">Exécute les outils dans un sandbox Docker/Podman</td>
+                        <td><span class="cmd-example">gemini --sandbox -p "Test ce script"</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">--yolo</td>
+                        <td class="cmd-desc">Auto-approuve tous les appels d'outils</td>
+                        <td><span class="cmd-example">gemini --yolo -p "Refactor tout"</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">--checkpointing</td>
+                        <td class="cmd-desc">Sauvegarde un snapshot avant modifications</td>
+                        <td><span class="cmd-example">gemini --checkpointing</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">--json</td>
+                        <td class="cmd-desc">Force la sortie en JSON structuré (très utile en headless/CI)</td>
+                        <td><span class="cmd-example">gemini --json -p "Liste les dépendances"</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cmd-name">-d / --debug</td>
+                        <td class="cmd-desc">Active les logs de debug</td>
+                        <td><span class="cmd-example">gemini -d -p "Test API call"</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- @ Commands -->
+        <h2 class="fade-in" style="margin-top:3rem;margin-bottom:0.5rem;">&#64; Context Commands <span class="tag tag-multimodal">Multimodal Ready</span></h2>
+        <p class="fade-in" style="color:var(--fg-secondary);margin-bottom:1.5rem;">Référencez des fichiers, répertoires, images ou vidéos nativement. Gemini 2.5 gère jusqu'à 2 Millions de tokens, n'ayez pas peur d'ajouter du contexte.</p>
+
+        <div class="grid-4 fade-in">
+            <div class="card">
+                <div class="card-icon cyan">&#128196;</div>
+                <h3>Fichier unique</h3>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Explique ce code. <span class="cmd">@</span>./src/main.js</code></pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon purple">&#128247;</div>
+                <h3>Image / UI</h3>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Génère le React pour <span class="cmd">@</span>./mockup.png</code></pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon pink">&#127902;</div>
+                <h3>Audio & Vidéo</h3>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Résume le meeting <span class="cmd">@</span>./reunion.mp3</code></pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon orange">&#128193;</div>
+                <h3>Répertoire complet</h3>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Refactor le dossier <span class="cmd">@</span>./src/api/</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip-box pro fade-in" style="margin-top:1.5rem;">
+            <div class="tip-label">&#128161; Puissance Multimodale</div>
+            <p>Combinez plusieurs <code>@</code> dans un seul prompt : <code>@./maquette_v2.png @./src/components/Button.tsx Mets à jour ce composant pour qu'il corresponde à la nouvelle maquette UI.</code>. Gemini CLI supporte aussi les PDF via <code>@</code>.</p>
+        </div>
+
+        <!-- Shell Commands -->
+        <h2 class="fade-in" style="margin-top:3rem;margin-bottom:0.5rem;">&#33; Shell Commands <span class="tag tag-advanced">Avancé</span></h2>
+        <p class="fade-in" style="color:var(--fg-secondary);margin-bottom:1.5rem;">Exécutez des commandes shell directement depuis le CLI.</p>
+
+        <div class="grid-2 fade-in">
+            <div class="card">
+                <h3>Commande unique</h3>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code><span class="cmd">!</span>git status</code></pre>
+                </div>
+                <p>Exécute <code>git status</code> et affiche le résultat.</p>
+            </div>
+            <div class="card">
+                <h3>Mode shell persistant</h3>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code><span class="comment"># Entrer en mode shell</span>
+<span class="cmd">!</span>
+
+<span class="comment"># Taper vos commandes normalement</span>
+ls -la
+git log --oneline
+
+<span class="comment"># Revenir au mode Gemini</span>
+<span class="cmd">!</span></code></pre>
+                </div>
+                <p>Tapez <code>!</code> seul pour basculer en mode shell persistant.</p>
+            </div>
+        </div>
+
+        <!-- Keyboard Shortcuts -->
+        <h2 class="fade-in" style="margin-top:3rem;margin-bottom:1rem;">&#9251; Raccourcis clavier</h2>
+        <div class="grid-4 fade-in">
+            <div class="card" style="text-align:center;padding:1.2rem;">
+                <kbd class="kbd" style="font-size:0.85rem;padding:6px 12px;">Ctrl+L</kbd>
+                <p style="margin-top:0.5rem;font-size:0.82rem;">Effacer l'écran</p>
+            </div>
+            <div class="card" style="text-align:center;padding:1.2rem;">
+                <kbd class="kbd" style="font-size:0.85rem;padding:6px 12px;">Ctrl+V</kbd>
+                <p style="margin-top:0.5rem;font-size:0.82rem;">Coller texte ou image</p>
+            </div>
+            <div class="card" style="text-align:center;padding:1.2rem;">
+                <kbd class="kbd" style="font-size:0.85rem;padding:6px 12px;">Ctrl+Y</kbd>
+                <p style="margin-top:0.5rem;font-size:0.82rem;">Toggle YOLO mode</p>
+            </div>
+            <div class="card" style="text-align:center;padding:1.2rem;">
+                <kbd class="kbd" style="font-size:0.85rem;padding:6px 12px;">Ctrl+X</kbd>
+                <p style="margin-top:0.5rem;font-size:0.82rem;">Ouvrir éditeur externe</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CONFIGURATION ===== -->
+<section class="section" id="config">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label">&#9881; Configuration</div>
+            <h2 class="section-title">Configuration & Personnalisation</h2>
+            <p class="section-desc">Personnalisez Gemini CLI selon vos préférences et les besoins de chaque projet.</p>
+        </div>
+
+        <!-- Settings.json -->
+        <div class="feature-row fade-in">
+            <div class="feature-text">
+                <h3>settings.json &mdash; Votre centre de contrôle</h3>
+                <p>Le fichier <code>settings.json</code> est le cœur de la configuration. Il existe 3 niveaux de priorité :</p>
+                <div class="flow" style="margin:1rem 0;">
+                    <div class="flow-step">Projet <code>.gemini/settings.json</code></div>
+                    <span class="flow-arrow">&rarr;</span>
+                    <div class="flow-step">Utilisateur <code>~/.gemini/settings.json</code></div>
+                    <span class="flow-arrow">&rarr;</span>
+                    <div class="flow-step">Système <code>/etc/gemini-cli/settings.json</code></div>
+                </div>
+                <p>Le fichier projet surcharge l'utilisateur, qui surcharge le système. Cela permet de configurer chaque projet différemment.</p>
+            </div>
+            <div class="code-block" style="margin:0;">
+                <div class="code-header">
+                    <span class="lang">json</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                </div>
+                <pre><code>{
+  <span class="string">"theme"</span>: <span class="string">"GitHub"</span>,
+  <span class="string">"autoAccept"</span>: <span class="cmd">false</span>,
+  <span class="string">"sandbox"</span>: <span class="string">"docker"</span>,
+  <span class="string">"vimMode"</span>: <span class="cmd">true</span>,
+  <span class="string">"checkpointing"</span>: { <span class="string">"enabled"</span>: <span class="cmd">true</span> },
+  <span class="string">"fileFiltering"</span>: { <span class="string">"respectGitIgnore"</span>: <span class="cmd">true</span> },
+  <span class="string">"includeDirectories"</span>: [<span class="string">"../shared-lib"</span>],
+  <span class="string">"chatCompression"</span>: {
+    <span class="string">"contextPercentageThreshold"</span>: <span class="cmd">0.6</span>
+  }
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- GEMINI.md -->
+        <div class="feature-row reverse fade-in" style="margin-top:3rem;">
+            <div class="feature-text">
+                <h3>GEMINI.md &mdash; Instructions Système intelligentes</h3>
+                <p>Les fichiers <code>GEMINI.md</code> agissent comme un System Prompt hyper-contextuel. Ils se chargent hiérarchiquement :</p>
+                <ol class="steps">
+                    <li data-step="1"><strong>Global</strong> : <code>~/.gemini/GEMINI.md</code> &mdash; Votre persona ("Réponds toujours en français, sois concis")</li>
+                    <li data-step="2"><strong>Projet</strong> : <code>./GEMINI.md</code> &mdash; Les conventions d'architecture de votre repo</li>
+                    <li data-step="3"><strong>Sous-répertoire</strong> : instructions spécifiques par composant</li>
+                </ol>
+                <p>Utilisez <code>/init</code> pour générer un GEMINI.md initial automatiquement.</p>
+            </div>
+            <div>
+                <div class="code-block" style="margin:0 0 1rem;">
+                    <div class="code-header">
+                        <span class="lang">markdown</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="comment"># Directives Projet</span>
+
+## Règles générales
+- TypeScript strict obligatoire
+- Ne propose pas de bibliothèques tierces non présentes dans le package.json
+- **Thinking Process :** Pense toujours étape par étape avant d'écrire du code
+- Tout le code Python doit suivre PEP 8
+- Utiliser 2 espaces d'indentation pour le JS
+
+## Documentation de référence
+<span class="cmd">@</span>./docs/architecture.pdf
+<span class="cmd">@</span>./docs/api-specs.md
+
+## Imports modulaires
+<span class="cmd">@</span>./src/frontend/react-style-guide.md
+<span class="cmd">@</span>./src/backend/fastapi-conventions.md</code></pre>
+                </div>
+                <div class="tip-box idea">
+                    <div class="tip-label">&#128161; Idée</div>
+                    <p>Utilisez <code>@file.md</code> pour modulariser vos instructions ! Séparez les conventions frontend, backend, tests, etc. dans des fichiers dédiés.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- .geminiignore -->
+        <div class="feature-row fade-in" style="margin-top:3rem;">
+            <div class="feature-text">
+                <h3>.geminiignore &mdash; Maîtriser le Contexte Géant</h3>
+                <p>Même si Gemini gère jusqu'à 2 Millions de tokens, limiter le bruit augmente la précision et réduit les coûts. Créez un <code>.geminiignore</code> pour exclure les fichiers inutiles lors de l'utilisation de <code>@./</code>. Similaire à <code>.gitignore</code>.</p>
+            </div>
+            <div class="code-block" style="margin:0;">
+                <div class="code-header">
+                    <span class="lang">gitignore</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                </div>
+                <pre><code><span class="comment"># .geminiignore</span>
+/backups/
+*.log
+secret-config.json
+.env.local
+node_modules/
+dist/
+*.min.js
+build/
+coverage/
+.git/</code></pre>
+            </div>
+        </div>
+
+        <!-- MCP Servers Config -->
+        <div class="fade-in" style="margin-top:3rem;">
+            <h3 style="margin-bottom:1rem;">MCP Servers &mdash; Étendre les capacités <span class="tag tag-advanced">Avancé</span></h3>
+            <p style="color:var(--fg-secondary);margin-bottom:1rem;">Configurez des serveurs MCP (Model Context Protocol) pour ajouter des outils personnalisés. Utilisez <code>gemini mcp add</code> en CLI ou configurez directement dans settings.json :</p>
+
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        &#128268; Configuration MCP dans settings.json
+                        <span class="chevron">&#9660;</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-body-inner">
+                            <div class="code-block" style="margin:0;">
+                                <div class="code-header">
+                                    <span class="lang">json</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                                </div>
+                                <pre><code>{
+  <span class="string">"mcpServers"</span>: {
+    <span class="string">"myPythonServer"</span>: {
+      <span class="string">"command"</span>: <span class="string">"python"</span>,
+      <span class="string">"args"</span>: [<span class="string">"-m"</span>, <span class="string">"my_mcp_server"</span>, <span class="string">"--port"</span>, <span class="string">"8080"</span>],
+      <span class="string">"cwd"</span>: <span class="string">"./mcp_tools/python"</span>,
+      <span class="string">"env"</span>: { <span class="string">"DATABASE_URL"</span>: <span class="string">"$DB_URL_FROM_ENV"</span> },
+      <span class="string">"timeout"</span>: <span class="cmd">15000</span>,
+      <span class="string">"trust"</span>: <span class="cmd">false</span>,
+      <span class="string">"includeTools"</span>: [<span class="string">"safe_tool_1"</span>, <span class="string">"safe_tool_2"</span>],
+      <span class="string">"excludeTools"</span>: [<span class="string">"dangerous_tool"</span>]
+    }
+  }
+}</code></pre>
+                            </div>
+                            <div class="tip-box pro" style="margin-top:1rem;">
+                                <div class="tip-label">&#128161; Transport</div>
+                                <p><strong>Stdio</strong> : <code>command</code> + <code>args</code> + <code>cwd</code> pour lancer un process local.<br>
+                                <strong>SSE</strong> : <code>url</code> pour un endpoint SSE (ex: <code>http://localhost:8080/sse</code>).<br>
+                                <strong>HTTP</strong> : <code>httpUrl</code> pour un endpoint HTTP streaming (ex: <code>http://localhost:8080/mcp</code>).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        &#128272; Options MCP détaillées
+                        <span class="chevron">&#9660;</span>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-body-inner">
+                            <table class="cmd-table">
+                                <thead><tr><th>Option</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td class="cmd-name">env</td><td class="cmd-desc">Variables d'environnement. Utilisez <code>$VAR_NAME</code> pour référencer le shell</td></tr>
+                                    <tr><td class="cmd-name">headers</td><td class="cmd-desc">Headers HTTP pour les transports url/httpUrl</td></tr>
+                                    <tr><td class="cmd-name">timeout</td><td class="cmd-desc">Timeout en ms (défaut: 10 min)</td></tr>
+                                    <tr><td class="cmd-name">trust</td><td class="cmd-desc">Contourne toutes les confirmations d'outils pour ce serveur</td></tr>
+                                    <tr><td class="cmd-name">includeTools</td><td class="cmd-desc">Whitelist des outils autorisés</td></tr>
+                                    <tr><td class="cmd-name">excludeTools</td><td class="cmd-desc">Blacklist d'outils (priorité sur includeTools)</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Commands -->
+        <div class="fade-in" style="margin-top:3rem;">
+            <h3 style="margin-bottom:1rem;">Commandes personnalisées <span class="tag tag-new">Nouveau</span></h3>
+            <p style="color:var(--fg-secondary);margin-bottom:1rem;">Créez vos propres slash commands avec des fichiers TOML dans <code>~/.gemini/commands/</code> (global) ou <code>&lt;project&gt;/.gemini/commands/</code> (projet).</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h4 style="margin-bottom:0.5rem;">Exemple : Générateur de tests</h4>
+                    <div class="code-block" style="margin:0.5rem 0;">
+                        <div class="code-header">
+                            <span class="lang">toml</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                        </div>
+                        <pre><code><span class="comment"># ~/.gemini/commands/test/gen.toml</span>
+<span class="comment"># Invoqué avec: /test:gen "Test du bouton login"</span>
+
+<span class="string">description</span> = <span class="string">"Génère un test unitaire"</span>
+
+<span class="string">prompt</span> = <span class="string">"""
+Vous êtes un ingénieur de test expert.
+Générez un test unitaire complet avec Jest.
+
+Exigence: {{args}}
+"""</span></code></pre>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4 style="margin-bottom:0.5rem;">Exemple : Review de code</h4>
+                    <div class="code-block" style="margin:0.5rem 0;">
+                        <div class="code-header">
+                            <span class="lang">toml</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                        </div>
+                        <pre><code><span class="comment"># ~/.gemini/commands/review/security.toml</span>
+<span class="comment"># Invoqué avec: /review:security</span>
+
+<span class="string">description</span> = <span class="string">"Audit sécurité du code"</span>
+
+<span class="string">prompt</span> = <span class="string">"""
+Analysez le code fourni pour les vulnérabilités:
+- Injections SQL/XSS
+- Fuites de données sensibles
+- Erreurs d'authentification
+- Dépendances vulnérables
+Fournissez un rapport avec sévérité.
+"""</span></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== BUILT-IN TOOLS ===== -->
+<section class="section" id="tools">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label">&#128295; Outils</div>
+            <h2 class="section-title">Outils Intégrés</h2>
+            <p class="section-desc">Gemini CLI dispose d'outils puissants pour interagir avec votre système de fichiers, le web et la mémoire.</p>
+        </div>
+
+        <!-- File System Tools -->
+        <h2 class="fade-in" style="margin-bottom:1rem;">&#128193; Outils Système de Fichiers</h2>
+        <div class="grid-2 fade-in">
+            <div class="card">
+                <div class="card-icon blue">&#128196;</div>
+                <h3>read_file</h3>
+                <p>Lit le contenu d'un fichier</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Lis le fichier de config <span class="cmd">@</span>./config/database.yml</code></pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon green">&#128190;</div>
+                <h3>write_file</h3>
+                <p>Crée ou écrase un fichier</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Crée un fichier docker-compose.yml pour une app Node+PostgreSQL</code></pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon yellow">&#128221;</div>
+                <h3>replace</h3>
+                <p>Remplace une portion de texte dans un fichier</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Dans main.js, remplace la fonction fetchData par une version avec async/await</code></pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon purple">&#128269;</div>
+                <h3>search_file_content</h3>
+                <p>Recherche un pattern dans les fichiers</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Cherche toutes les utilisations de la fonction deprecatedAPI dans les fichiers .ts</code></pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon cyan">&#128193;</div>
+                <h3>list_directory</h3>
+                <p>Liste le contenu d'un répertoire</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Liste les fichiers dans le répertoire src/components/</code></pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon orange">&#128270;</div>
+                <h3>glob</h3>
+                <p>Recherche avec pattern glob</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Trouve tous les fichiers de test: glob pattern **/*.test.ts</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Web Tools -->
+        <h2 class="fade-in" style="margin-top:3rem;margin-bottom:1rem;">&#127760; Outils Web</h2>
+        <div class="grid-2 fade-in">
+            <div class="card">
+                <div class="card-icon blue">&#128269;</div>
+                <h3>google_web_search</h3>
+                <p>Recherche sur le web via Google</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Cherche les meilleures pratiques pour les indexes PostgreSQL en 2025</code></pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon green">&#127760;</div>
+                <h3>web_fetch</h3>
+                <p>Récupère et résume le contenu d'une URL</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Résume l'article à cette URL: https://example.com/api-guide</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory & Shell -->
+        <h2 class="fade-in" style="margin-top:3rem;margin-bottom:1rem;">&#129504; Mémoire & Shell</h2>
+        <div class="grid-2 fade-in">
+            <div class="card">
+                <div class="card-icon purple">&#129504;</div>
+                <h3>save_memory</h3>
+                <p>Sauvegarde des faits persistants entre les sessions. Gemini se souviendra de vos préférences !</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Souviens-toi que je préfère Tailwind CSS comme framework CSS</code></pre>
+                </div>
+                <div class="tip-box idea" style="margin-top:0.8rem;">
+                    <div class="tip-label">&#128161; Exemple</div>
+                    <p>"Souviens-toi que ce projet utilise PostgreSQL, pas MySQL" &mdash; Gemini le retiendra pour toutes les sessions futures.</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon orange">&#128187;</div>
+                <h3>run_shell_command</h3>
+                <p>Exécute des commandes shell. <strong>Attention :</strong> à utiliser avec précaution !</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <pre><code>Exécute npm test et analyse les résultats</code></pre>
+                </div>
+                <div class="tip-box warn" style="margin-top:0.8rem;">
+                    <div class="tip-label">&#9888; Sécurité</div>
+                    <p>Restreignez les commandes dangereuses dans settings.json : <code>"excludeTools": ["run_shell_command(rm)"]</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ADVANCED FEATURES ===== -->
+<section class="section" id="advanced">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label">&#128640; Avancé</div>
+            <h2 class="section-title">Fonctionnalités Avancées</h2>
+            <p class="section-desc">Passez au niveau supérieur avec ces fonctionnalités puissantes de Gemini CLI.</p>
+        </div>
+
+        <div class="grid-2 fade-in">
+            <!-- IDE Integration -->
+            <div class="card">
+                <div class="card-icon blue">&#128187;</div>
+                <h3>Intégration VS Code</h3>
+                <p>Connectez Gemini CLI à VS Code pour une expérience contextuelle enrichie. Le CLI obtient automatiquement vos fichiers récents, la position du curseur et le texte sélectionné. Les changements de code sont affichés dans le diff viewer natif de VS Code.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="comment"># Installer l'intégration</span>
+/ide install
+
+<span class="comment"># Activer la connexion</span>
+/ide enable</code></pre>
+                </div>
+            </div>
+
+            <!-- Code Interpreter -->
+            <div class="card">
+                <div class="card-icon green">&#128187;</div>
+                <h3>Exécution de Code (Code Interpreter)</h3>
+                <p>Plutôt que d'essayer de "deviner", Gemini peut générer du code Python, l'exécuter dans un bac à sable (sandbox), et analyser le résultat pour répondre précisément à votre requête (manipulation CSV, calculs complexes, analyse de données).</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="cmd">gemini</span> <span class="flag">--sandbox</span> <span class="flag">-p</span> <span class="string">"Analyse @./sales.csv et
+calcule le revenu total par mois avec pandas.
+Affiche-moi le résultat final."</span></code></pre>
+                </div>
+            </div>
+
+            <!-- Google Search Grounding -->
+            <div class="card">
+                <div class="card-icon blue">&#127760;</div>
+                <h3>Google Search Grounding</h3>
+                <p>Évitez les hallucinations sur les frameworks très récents. L'outil intégré <code>google_web_search</code> permet à Gemini de valider ses connaissances en temps réel sur internet avant de coder. Idéal pour les APIs et librairies qui évoluent vite.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="cmd">gemini</span> <span class="flag">-p</span> <span class="string">"Crée un composant React en utilisant
+les tout derniers hooks sortis le mois dernier.
+Fais une recherche web d'abord."</span></code></pre>
+                </div>
+            </div>
+
+            <!-- Checkpointing -->
+            <div class="card">
+                <div class="card-icon orange">&#128190;</div>
+                <h3>Checkpointing & Restore</h3>
+                <p>Sauvegardez des snapshots de votre projet avant chaque modification. L'option checkpointing effectue un "commit silencieux" avant chaque exécution d'outil. Si le code généré casse tout, restaurez en 1 seconde.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="comment"># Activer le checkpointing</span>
+<span class="cmd">gemini</span> <span class="flag">--checkpointing</span>
+
+<span class="comment"># Lister les checkpoints disponibles</span>
+/restore
+
+<span class="comment"># Restaurer un checkpoint spécifique</span>
+/restore checkpoint_20250520_143022</code></pre>
+                </div>
+            </div>
+
+            <!-- Headless Mode -->
+            <div class="card">
+                <div class="card-icon purple">&#129302;</div>
+                <h3>Mode Headless</h3>
+                <p>Exécutez Gemini CLI sans interface interactive. Idéal pour l'automatisation, les pipelines CI/CD et les scripts batch.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="comment"># Mode headless pour automatisation</span>
+<span class="cmd">gemini</span> <span class="flag">-p</span> <span class="string">"Génère les tests unitaires"</span> <span class="flag">--yolo</span>
+
+<span class="comment"># Dans un script CI/CD</span>
+<span class="cmd">gemini</span> <span class="flag">-p</span> <span class="string">"Review ce PR et signale les problèmes"</span> \
+  <span class="flag">--sandbox</span> 2>&1 | tee review.log</code></pre>
+                </div>
+            </div>
+
+            <!-- Extensions -->
+            <div class="card">
+                <div class="card-icon cyan">&#129513;</div>
+                <h3>Extensions</h3>
+                <p>Créez des extensions pour ajouter des fonctionnalités. Chaque extension est un répertoire avec un fichier <code>gemini-extension.json</code> qui configure des serveurs MCP, outils et fichiers de contexte.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">json</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code>{
+  <span class="string">"name"</span>: <span class="string">"my-extension"</span>,
+  <span class="string">"version"</span>: <span class="string">"1.0.0"</span>,
+  <span class="string">"mcpServers"</span>: {
+    <span class="string">"my-server"</span>: {
+      <span class="string">"command"</span>: <span class="string">"node my-server.js"</span>
+    }
+  },
+  <span class="string">"excludeTools"</span>: [<span class="string">"run_shell_command"</span>]
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Model Routing -->
+            <div class="card">
+                <div class="card-icon yellow">&#127919;</div>
+                <h3>Model Routing & Steering <span class="tag tag-experimental">Expérimental</span></h3>
+                <p>Gemini CLI peut router intelligemment les requêtes vers différents modèles selon la complexité. Les tâches simples utilisent Flash (rapide), les tâches complexes utilisent Pro (puissant).</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="comment"># Utiliser un modèle spécifique</span>
+<span class="cmd">gemini</span> <span class="flag">-m</span> <span class="string">gemini-2.5-pro</span>
+
+<span class="comment"># Flash pour les tâches rapides</span>
+<span class="cmd">gemini</span> <span class="flag">-m</span> <span class="string">gemini-2.5-flash</span> <span class="flag">-p</span> <span class="string">"Corrige cette typo"</span>
+
+<span class="comment"># Gemini 3 Pro (si disponible)</span>
+<span class="comment"># Via /settings > Preview Model</span></code></pre>
+                </div>
+            </div>
+
+            <!-- Git Worktrees -->
+            <div class="card">
+                <div class="card-icon orange">&#128204;</div>
+                <h3>Git Worktrees <span class="tag tag-experimental">Expérimental</span></h3>
+                <p>Travaillez sur plusieurs branches simultanément. Gemini CLI peut créer et gérer des worktrees pour paralléliser vos développements sans conflits.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="comment"># Créer un worktree pour une feature</span>
+<span class="cmd">git</span> worktree add ../feature-auth feature/auth
+
+<span class="comment"># Lancer Gemini CLI dans le worktree</span>
+<span class="cmd">cd</span> ../feature-auth && <span class="cmd">gemini</span></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== TIPS ===== -->
+<section class="section" id="tips">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label">&#128161; Conseils</div>
+            <h2 class="section-title">Conseils d'Utilisation Pro</h2>
+            <p class="section-desc">Optimisez votre workflow avec ces conseils éprouvés par la communauté.</p>
+        </div>
+
+        <!-- Workflow Tips -->
+        <div class="grid-2 fade-in">
+            <div class="tip-box pro">
+                <div class="tip-label">&#128161; Chain of Thought (Pensée en étapes)</div>
+                <p>Forcez l'IA à analyser avant de coder. Ajoutez : <code>"Analyse d'abord le problème étape par étape dans des balises &lt;thinking&gt; avant de fournir la solution en code."</code> La qualité des réponses sur des bugs complexes sera décuplée.</p>
+            </div>
+            <div class="tip-box pro">
+                <div class="tip-label">&#128161; Few-Shot Prompting</div>
+                <p>Donnez des exemples. Si vous voulez un style de code précis, passez-lui un fichier exemple : <code>"Voici comment j'écris mes tests @./exemple.test.js. Écris les tests pour @./nouveauFichier.js en suivant exactement le même pattern."</code></p>
+            </div>
+        </div>
+
+        <div class="grid-2 fade-in" style="margin-top:1rem;">
+            <div class="tip-box success">
+                <div class="tip-label">&#10003; Toujours utiliser checkpointing</div>
+                <p>Activez <code>--checkpointing</code> pour les tâches de modification de code. Cela vous permet de revenir en arrière si le résultat n'est pas satisfaisant. Combinez avec <code>/restore</code> pour un filet de sécurité complet.</p>
+            </div>
+            <div class="tip-box success">
+                <div class="tip-label">&#10003; Organisez vos GEMINI.md</div>
+                <p>Un bon <code>GEMINI.md</code> fait toute la différence. Documentez vos conventions de code, l'architecture du projet, les dépendances clés et les pièges à éviter. Utilisez les imports <code>@file.md</code> pour rester organisé.</p>
+            </div>
+        </div>
+
+        <div class="grid-2 fade-in" style="margin-top:1rem;">
+            <div class="tip-box warn">
+                <div class="tip-label">&#9888; Attention au YOLO mode</div>
+                <p><code>--yolo</code> auto-approuve tous les appels d'outils. C'est pratique mais risqué ! Ne l'utilisez que sur des projets que vous pouvez restaurer facilement. Toujours activer le checkpointing avec YOLO.</p>
+            </div>
+            <div class="tip-box warn">
+                <div class="tip-label">&#9888; Limitez le contexte</div>
+                <p>Ne référencez pas tout un projet avec <code>@./</code> si vous n'avez besoin que d'un fichier. Plus le contexte est grand, plus les réponses sont lentes et coûteuses en tokens. Soyez ciblé avec <code>@</code>.</p>
+            </div>
+        </div>
+
+        <!-- Comparison: Bad vs Good -->
+        <h2 class="fade-in" style="margin-top:3rem;margin-bottom:1rem;">Prompts : Mauvais vs Bons</h2>
+        <div class="compare-grid fade-in">
+            <div class="compare-col bad">
+                <h4>&#10005; Trop vague (Hallucinations fréquentes)</h4>
+                <ul>
+                    <li>"Refactor tout le projet"</li>
+                    <li>"Corrige les bugs de l'API"</li>
+                    <li>"Fais une interface de login stylée"</li>
+                    <li>"Optimise cette fonction"</li>
+                    <li>"Ajoute des tests"</li>
+                </ul>
+            </div>
+            <div class="compare-col good">
+                <h4>&#10003; Contextuel et Directif (Exécution parfaite)</h4>
+                <ul>
+                    <li>"Dans @./src/auth.ts, extrais la validation de mot de passe dans une fonction pure."</li>
+                    <li>"L'endpoint POST /users renvoie 500 quand l'email existe déjà. Ajoute un try/catch et un code 409."</li>
+                    <li>"À partir de @./maquette.png, crée un composant React avec TailwindCSS. Reste fidèle aux couleurs."</li>
+                    <li>"Réduis la complexité cyclomatique de la méthode calculateTax dans @./billing.ts."</li>
+                    <li>"Génère des tests Jest pour @./cart.ts en couvrant les edge cases : panier vide, quantité 0, prix négatif"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Session Management Tips -->
+        <h2 class="fade-in" style="margin-top:3rem;margin-bottom:1rem;">Gestion de sessions</h2>
+        <div class="grid-3 fade-in">
+            <div class="card">
+                <div class="card-icon blue">&#128190;</div>
+                <h3>Sauvegarder</h3>
+                <div class="code-block" style="margin:0.3rem 0;">
+                    <pre><code>/chat save feature-auth</code></pre>
+                </div>
+                <p>Taggez vos sessions pour les reprendre plus tard.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon green">&#9654;</div>
+                <h3>Reprendre</h3>
+                <div class="code-block" style="margin:0.3rem 0;">
+                    <pre><code>/chat resume feature-auth</code></pre>
+                </div>
+                <p>Reprenez exactement où vous en étiez.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon yellow">&#128200;</div>
+                <h3>Monitorer</h3>
+                <div class="code-block" style="margin:0.3rem 0;">
+                    <pre><code>/stats</code></pre>
+                </div>
+                <p>Suivez votre consommation de tokens en temps réel.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== IDEAS ===== -->
+<section class="section" id="ideas">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label">&#127775; Idées</div>
+            <h2 class="section-title">Idées Réalistes & Cas d'Usage</h2>
+            <p class="section-desc">Des projets concrets que vous pouvez réaliser dès aujourd'hui avec Gemini CLI.</p>
+        </div>
+
+        <div class="grid-2 fade-in">
+            <!-- Idea 1 -->
+            <div class="card">
+                <div class="card-icon pink">&#128247;</div>
+                <h3>1. UI depuis une maquette</h3>
+                <p>Le workflow front-end ultime : convertissez une capture d'écran en code fonctionnel directement.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">prompt</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code>Génère le code HTML/Tailwind exact pour la maquette @./design-dashboard.png.
+Assure-toi que c'est fully responsive.
+Écris les fichiers correspondants dans le dossier @./src/components/.</code></pre>
+                </div>
+            </div>
+
+            <!-- Idea 2 -->
+            <div class="card">
+                <div class="card-icon green">&#128270;</div>
+                <h3>2. Audit de sécurité automatisé</h3>
+                <p>Créez une commande personnalisée <code>/review:security</code> qui analyse systématiquement votre code pour les vulnérabilités.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">prompt</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code>Analyse @./src/ pour les vulnérabilités :
+- Injections SQL et XSS
+- Credentials hardcodés
+- Dépendances obsolètes
+- Mauvaises configurations CORS
+Génère un rapport avec niveau de sévérité</code></pre>
+                </div>
+            </div>
+
+            <!-- Idea 3 -->
+            <div class="card">
+                <div class="card-icon purple">&#128640;</div>
+                <h3>3. Migration de framework</h3>
+                <p>Migrez progressivement un projet d'un framework à un autre en laissant Gemini CLI faire le gros du travail.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">prompt</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code>Migre @./src/App.js de Class Components 
+vers Functional Components avec Hooks.
+Conserve la même logique métier.
+Ajoute les types TypeScript.</code></pre>
+                </div>
+            </div>
+
+            <!-- Idea 4 -->
+            <div class="card">
+                <div class="card-icon orange">&#128202;</div>
+                <h3>4. Documentation automatique</h3>
+                <p>Générez la documentation technique complète d'un projet existant qui en manque.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">prompt</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code>Analyse @./src/ et génère :
+- README.md avec architecture et setup
+- JSDoc pour toutes les fonctions exportées
+- ARCHITECTURE.md avec diagrammes Mermaid
+- CHANGELOG.md basé sur l'historique git</code></pre>
+                </div>
+            </div>
+
+            <!-- Idea 5 -->
+            <div class="card">
+                <div class="card-icon cyan">&#129302;</div>
+                <h3>5. MCP Server personnalisé</h3>
+                <p>Créez un serveur MCP qui connecte Gemini CLI à votre base de données PostgreSQL pour des requêtes en langage naturel.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">concept</span>
+                    </div>
+                    <pre><code><span class="comment"># Serveur MCP PostgreSQL</span>
+- Query Builder en langage naturel
+- Schema inspection automatique
+- Analyse de performances des requêtes
+- Génération de migrations SQL</code></pre>
+                </div>
+            </div>
+
+            <!-- Idea 6 -->
+            <div class="card">
+                <div class="card-icon red">&#128274;</div>
+                <h3>6. Pipeline CI/CD avec Review</h3>
+                <p>Intégrez Gemini CLI en mode headless dans votre pipeline pour un code review automatisé à chaque PR.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">yaml</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+                    </div>
+                    <pre><code><span class="comment"># .github/workflows/ai-review.yml</span>
+- name: AI Code Review
+  run: |
+    gemini -p "Review les changements 
+    de cette PR. Signale bugs, problèmes 
+    de perf et vulnérabilités." \
+    --sandbox --yolo \
+    > review-comment.md</code></pre>
+                </div>
+            </div>
+
+            <!-- Idea 7 -->
+            <div class="card">
+                <div class="card-icon yellow">&#127891;</div>
+                <h3>7. Tutoriel interactif</h3>
+                <p>Utilisez Gemini CLI comme tuteur de programmation interactif avec des exercices pratiques.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">prompt</span>
+                    </div>
+                    <pre><code>Je veux apprendre Rust. Crée un exercice 
+progressif sur les ownership et borrowing.
+Commence par un exemple simple, puis 
+donne-moi un exercice à résoudre.
+Ne me donne pas la solution directement !</code></pre>
+                </div>
+            </div>
+
+            <!-- Idea 8 -->
+            <div class="card">
+                <div class="card-icon green">&#128200;</div>
+                <h3>8. Monitoring & Analyse de logs</h3>
+                <p>Analysez vos logs de production en temps réel avec Gemini CLI pour détecter les patterns d'erreur.</p>
+                <div class="code-block" style="margin:0.5rem 0;">
+                    <div class="code-header">
+                        <span class="lang">bash</span>
+                    </div>
+                    <pre><code><span class="cmd">tail</span> -1000 /var/log/app.log <span class="cmd">|</span> \
+  <span class="cmd">gemini</span> <span class="flag">-p</span> <span class="string">"Analyse ces logs, identifie
+les patterns d'erreur récurrents,
+et propose des solutions"</span></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow complet -->
+        <div class="fade-in" style="margin-top:3rem;">
+            <h2 style="margin-bottom:1rem;">&#127919; Workflow complet type</h2>
+            <p style="color:var(--fg-secondary);margin-bottom:1.5rem;">Voici un workflow réaliste pour utiliser Gemini CLI au quotidien sur un projet de développement :</p>
+
+            <div class="card">
+                <ol class="steps">
+                    <li data-step="1">
+                        <strong>Initialisation du projet</strong> &mdash; Lancez <code>/init</code> pour générer un <code>GEMINI.md</code> adapté à votre projet. Personnalisez-le avec vos conventions.
+                    </li>
+                    <li data-step="2">
+                        <strong>Configuration</strong> &mdash; Activez le checkpointing (<code>--checkpointing</code>) et configurez votre <code>settings.json</code> avec <code>autoAccept: false</code> pour garder le contrôle.
+                    </li>
+                    <li data-step="3">
+                        <strong>Développement itératif</strong> &mdash; Décrivez vos besoins avec précision, référencez les fichiers avec <code>@</code>, et validez chaque modification proposée.
+                    </li>
+                    <li data-step="4">
+                        <strong>Tests & Validation</strong> &mdash; Demandez à Gemini d'écrire les tests, exécutez-les avec <code>!</code>npm test, et itérez sur les échecs.
+                    </li>
+                    <li data-step="5">
+                        <strong>Review & Documentation</strong> &mdash; Avant de commit, demandez une review complète et la mise à jour de la documentation.
+                    </li>
+                    <li data-step="6">
+                        <strong>Sauvegarde</strong> &mdash; Utilisez <code>/chat save</code> pour garder une trace de vos sessions de travail.
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CHEATSHEET RÉCAPITULATIF ===== -->
+<section class="section" id="cheatsheet">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label">&#128203; Récapitulatif</div>
+            <h2 class="section-title">Cheat Sheet Express</h2>
+            <p class="section-desc">Tout l'essentiel sur une seule page pour un accès rapide au quotidien.</p>
+        </div>
+
+        <div class="card fade-in" style="padding:0;overflow-x:auto;">
+            <table class="cmd-table">
+                <thead>
+                    <tr>
+                        <th style="width:220px;">Action</th>
+                        <th>Commande</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="cmd-desc">Installer</td><td><span class="cmd-example">npm install -g @google/gemini-cli</span></td></tr>
+                    <tr><td class="cmd-desc">Lancer interactif</td><td><span class="cmd-example">gemini</span></td></tr>
+                    <tr><td class="cmd-desc">Prompt unique</td><td><span class="cmd-example">gemini -p "votre prompt"</span></td></tr>
+                    <tr><td class="cmd-desc">Interactif + prompt</td><td><span class="cmd-example">gemini -i "votre prompt"</span></td></tr>
+                    <tr><td class="cmd-desc">Choisir le modèle</td><td><span class="cmd-example">gemini -m gemini-2.5-pro</span></td></tr>
+                    <tr><td class="cmd-desc">Mode sandbox</td><td><span class="cmd-example">gemini --sandbox -p "prompt"</span></td></tr>
+                    <tr><td class="cmd-desc">Auto-approuver</td><td><span class="cmd-example">gemini --yolo</span></td></tr>
+                    <tr><td class="cmd-desc">Checkpointing</td><td><span class="cmd-example">gemini --checkpointing</span></td></tr>
+                    <tr><td class="cmd-desc">Sortie JSON structuré</td><td><span class="cmd-example">gemini --json -p "prompt"</span></td></tr>
+                    <tr><td class="cmd-desc">Référencer Code/Image/Son</td><td><span class="cmd-example">@./chemin/vers/fichier.ext</span></td></tr>
+                    <tr><td class="cmd-desc">Référencer un dossier</td><td><span class="cmd-example">@./src/</span></td></tr>
+                    <tr><td class="cmd-desc">Shell command</td><td><span class="cmd-example">!git status</span></td></tr>
+                    <tr><td class="cmd-desc">Compresser contexte</td><td><span class="cmd-example">/compress</span></td></tr>
+                    <tr><td class="cmd-desc">Sauver session</td><td><span class="cmd-example">/chat save mon-tag</span></td></tr>
+                    <tr><td class="cmd-desc">Reprendre session</td><td><span class="cmd-example">/chat resume mon-tag</span></td></tr>
+                    <tr><td class="cmd-desc">Voir mémoire</td><td><span class="cmd-example">/memory show</span></td></tr>
+                    <tr><td class="cmd-desc">Ajouter MCP</td><td><span class="cmd-example">gemini mcp add nom-serveur</span></td></tr>
+                    <tr><td class="cmd-desc">Voir MCP</td><td><span class="cmd-example">/mcp</span></td></tr>
+                    <tr><td class="cmd-desc">Restaurer checkpoint</td><td><span class="cmd-example">/restore</span></td></tr>
+                    <tr><td class="cmd-desc">Stats tokens</td><td><span class="cmd-example">/stats</span></td></tr>
+                    <tr><td class="cmd-desc">Init GEMINI.md</td><td><span class="cmd-example">/init</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <p>
+        Guide non-officiel créé avec passion pour la communauté &middot; 
+        <a href="https://github.com/google-gemini/gemini-cli" target="_blank">Gemini CLI sur GitHub</a> &middot; 
+        <a href="https://geminicli.com" target="_blank">Documentation officielle</a> &middot; 
+        <a href="https://aistudio.google.com/app/apikey" target="_blank">Obtenir une clé API</a>
+    </p>
+    <p style="margin-top:0.5rem;font-size:0.78rem;color:var(--fg-muted);">
+        Dernière mise à jour : 2026 &middot; Gemini CLI est un projet open-source de Google
+    </p>
+</footer>
+
+<!-- Scroll to top -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#9650;</button>
+
+<script>
+// ===== Copy code =====
+function copyCode(btn) {
+    const codeBlock = btn.closest('.code-block');
+    const code = codeBlock.querySelector('pre code') || codeBlock.querySelector('pre');
+    const text = code.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copié !';
+        btn.style.color = '#4285f4';
+        btn.style.borderColor = 'rgba(66,133,244,0.3)';
+        setTimeout(() => {
+            btn.textContent = 'Copier';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+        }, 2000);
+    });
+}
+
+// ===== Accordion =====
+function toggleAccordion(btn) {
+    const item = btn.closest('.accordion-item');
+    item.classList.toggle('open');
+}
+
+// ===== Scroll animations =====
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ===== Floating nav =====
+const navFloat = document.getElementById('navFloat');
+const navLinks = navFloat.querySelectorAll('a');
+const sections = document.querySelectorAll('section[id]');
+
+window.addEventListener('scroll', () => {
+    // Show/hide nav
+    if (window.scrollY > 500) {
+        navFloat.classList.add('visible');
+    } else {
+        navFloat.classList.remove('visible');
+    }
+
+    // Active section
+    let current = '';
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop - 200;
+        if (window.scrollY >= sectionTop) {
+            current = section.getAttribute('id');
+        }
+    });
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+            link.classList.add('active');
+        }
+    });
+
+    // Scroll to top button
+    const scrollTop = document.getElementById('scrollTop');
+    if (window.scrollY > 1000) {
+        scrollTop.classList.add('visible');
+    } else {
+        scrollTop.classList.remove('visible');
+    }
+});
+
+// ===== Smooth scroll for nav links =====
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+</script>
+
+</body>
+</html>
